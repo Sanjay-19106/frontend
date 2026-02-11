@@ -14,7 +14,8 @@ function AdminView({ data, setData, closeAdmin }) {
  const saveChanges = async () => {
   const token = localStorage.getItem("token");
 
-  await fetch("http://localhost:5000/api/page", {
+  await fetch(`${import.meta.env.VITE_API_URL}/api/page`, {
+
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -10,13 +10,14 @@ function App() {
     !!localStorage.getItem("token")
   );
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/page")
-      .then((res) => res.json())
-      .then((dbData) => {
-        if (dbData) setData(dbData);
-      });
-  }, []);
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_API_URL}/api/page`)
+    .then(res => res.json())
+    .then(data => {
+      if (data) setData(data);
+    });
+}, []);
+
 
   if (!data) return <div>Loading...</div>;
 
