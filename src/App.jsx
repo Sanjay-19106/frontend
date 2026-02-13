@@ -14,9 +14,20 @@ useEffect(() => {
   fetch(`${import.meta.env.VITE_API_URL}/api/page`)
     .then(res => res.json())
     .then(data => {
-      if (data) setData(data);
+      if (data === null) {
+        console.log("No data yet");
+        setLoading(false);
+        return;
+      }
+      setData(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
     });
 }, []);
+
 
 
   if (!data) return <div>Loading...</div>;
