@@ -5,32 +5,65 @@ import Login from "./pages/Login";
 
 function App() {
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState("user");
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("token")
   );
 
-useEffect(() => {
-  fetch(`${import.meta.env.VITE_API_URL}/api/page`)
-    .then(res => res.json())
-    .then(data => {
-      if (data === null) {
-        console.log("No data yet");
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/page`)
+      .then((res) => res.json())
+      .then((result) => {
+        if (result === null) {
+          console.log("No data yet in DB");
+          setData(null);
+        } else {
+          setData(result);
+        }
         setLoading(false);
-        return;
-      }
-      setData(data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
-}, []);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setLoading(false);
+      });
+  }, []);
 
+  if (loading) {
+    return (
+      <div style={{ padding: 40, textAlign: "center" }}>
+        Loading...
+      </div>
+    );
+  }
 
+  // If database empty
+  if (!data) {
+    return (
+      <div style={{ padding: 40, textAlign: "center" }}>
+        <h2>No Page Data Yet</h2>
+        <p>Login as admin to create content.</p>
+        <button onClick={() => setMode("admin")}>
+          Go to Admin
+        </button>
 
-  if (!data) return <div>Loading...</div>;
+        {mode === "admin" && !isLoggedIn && (
+          <Login onLogin={() => setIsLoggedIn(true)} />
+        )}
+
+        {mode === "admin" && isLoggedIn && (
+          <AdminView
+            data={{
+              settings: {},
+              sections: []
+            }}
+            setData={setData}
+            closeAdmin={() => setMode("user")}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
