@@ -50,8 +50,6 @@ function App() {
             )
           }
         />
-
-        {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" />} />
 
       </Routes>
