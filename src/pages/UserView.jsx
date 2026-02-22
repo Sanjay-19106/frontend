@@ -4,16 +4,24 @@ import "../styles/user.css";
 function UserView({ data, isAdmin, openAdmin }) {
   const [open, setOpen] = useState(null);
 
+  // ✅ Safe defaults
+  const settings = data?.settings || {};
+  const sections = data?.sections || [];
+
+  const backgroundStyle =
+    settings.backgroundType === "image"
+      ? {
+          backgroundImage: `url(${settings.backgroundValue})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : {
+          background:
+            settings.backgroundValue || "#111111",
+        };
+
   return (
-    <div
-      className="user-page"
-      style={{
-        background:
-          data.settings.backgroundType === "image"
-            ? `url(${data.settings.backgroundValue}) center/cover`
-            : data.settings.backgroundValue,
-      }}
-    >
+    <div className="user-page" style={backgroundStyle}>
       {/* ⚙️ ONLY FOR ADMIN */}
       {isAdmin && (
         <button className="user-settings-btn" onClick={openAdmin}>
@@ -25,16 +33,16 @@ function UserView({ data, isAdmin, openAdmin }) {
         {/* PROFILE */}
         <div className="profile">
           <div className="avatar">
-            {data.settings.profileImage && (
-              <img src={data.settings.profileImage} alt="profile" />
+            {settings.profileImage && (
+              <img src={settings.profileImage} alt="profile" />
             )}
           </div>
-          <h1>{data.settings.name}</h1>
-          <p>{data.settings.tagline}</p>
+          <h1>{settings.name || "Your Name"}</h1>
+          <p>{settings.tagline || "Your tagline here"}</p>
         </div>
 
         {/* SECTIONS */}
-        {data.sections.map((section) => (
+        {sections.map((section) => (
           <div key={section.id} className="accordion-item">
             <button
               className="accordion-btn"
@@ -50,11 +58,11 @@ function UserView({ data, isAdmin, openAdmin }) {
                 open === section.id ? "open" : ""
               }`}
             >
-              {section.categories.map((cat, i) => (
+              {section.categories?.map((cat, i) => (
                 <div key={i}>
                   <h4>{cat.title}</h4>
-                  {cat.links.map((link, j) => (
-                    <a key={j} href={link.url}>
+                  {cat.links?.map((link, j) => (
+                    <a key={j} href={link.url} target="_blank" rel="noreferrer">
                       {link.label}
                     </a>
                   ))}
