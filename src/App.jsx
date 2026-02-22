@@ -86,6 +86,12 @@ function App() {
           closeAdmin={() => setMode("user")}
         />
       )}
+      <button onClick={() => {
+  localStorage.removeItem("token");
+  window.location.reload();
+}}>
+  Logout
+</button>
     </>
   );
 }
