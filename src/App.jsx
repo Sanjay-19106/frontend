@@ -7,9 +7,9 @@ import Login from "./pages/Login";
 function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const token = sessionStorage.getItem("token");
-  const isAdmin = !!token;
+  const [isAdmin, setIsAdmin] = useState(
+    !!sessionStorage.getItem("token")
+  );
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/page`)
@@ -39,9 +39,15 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin
-              ? <AdminView data={data} setData={setData} />
-              : <Login />
+            isAdmin ? (
+              <AdminView
+                data={data}
+                setData={setData}
+                setIsAdmin={setIsAdmin}
+              />
+            ) : (
+              <Login setIsAdmin={setIsAdmin} />
+            )
           }
         />
 

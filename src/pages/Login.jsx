@@ -1,66 +1,62 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/login.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import UserView from "./pages/UserView";
+import AdminView from "./pages/AdminView";
+import Login from "./pages/Login";
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+function App() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(
+    !!sessionStorage.getItem("token")
+  );
 
-  const handleLogin = async (e) => {
-    e.preventDefault();   // 🔥 prevents page refresh
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/page`)
+      .then((res) => res.json())
+      .then((result) => {
+        setData(result);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.token) {
-        sessionStorage.setItem("token", data.token);
-        navigate("/admin");
-      } else {
-        alert("Invalid credentials");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      alert("Something went wrong");
-    }
-  };
+  if (loading) {
+    return <div style={{ padding: 40 }}>Loading...</div>;
+  }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <h2>Admin Login</h2>
+    <BrowserRouter>
+      <Routes>
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        {/* 🌍 Public Route */}
+        <Route
+          path="/"
+          element={<UserView data={data} />}
+        />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        {/* 🔐 Admin Route */}
+        <Route
+          path="/admin"
+          element={
+            isAdmin ? (
+              <AdminView
+                data={data}
+                setData={setData}
+                setIsAdmin={setIsAdmin}
+              />
+            ) : (
+              <Login setIsAdmin={setIsAdmin} />
+            )
+          }
+        />
 
-          <button type="submit">Login</button>
-        </form>
-      </div>
-    </div>
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 
-export default Login;
+export default App;
