@@ -22,12 +22,7 @@ function UserView({ data, isAdmin, openAdmin }) {
 
   return (
     <div className="user-page" style={backgroundStyle}>
-      {/* ⚙️ ONLY FOR ADMIN */}
-      {isAdmin && (
-        <button className="user-settings-btn" onClick={openAdmin}>
-          ⚙️
-        </button>
-      )}
+     
 
       <div className="user-container">
         {/* PROFILE */}
