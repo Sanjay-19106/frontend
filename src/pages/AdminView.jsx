@@ -32,7 +32,7 @@ function AdminView({ data, setData, closeAdmin }) {
   };
 
   const saveChanges = async () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     await fetch(`${import.meta.env.VITE_API_URL}/api/page`, {
       method: "POST",

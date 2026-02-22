@@ -23,7 +23,7 @@ function Login() {
       const data = await res.json();
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        sessionStorage.setItem("token", data.token);
         navigate("/admin");
       } else {
         alert("Invalid credentials");

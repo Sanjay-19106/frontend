@@ -8,7 +8,7 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const isAdmin = !!token;
 
   useEffect(() => {
