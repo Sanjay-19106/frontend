@@ -1,33 +1,50 @@
 import "../styles/admin.css";
 
 function AdminView({ data, setData, closeAdmin }) {
+  // ✅ SAFE STRUCTURE (prevents crashes)
+  const safeData = {
+    settings: {
+      name: "",
+      tagline: "",
+      backgroundType: "color",
+      backgroundValue: "#111111",
+      profileImage: "",
+      ...(data?.settings || {}),
+    },
+    sections: data?.sections || [],
+  };
+
   const updateSetting = (key, value) => {
     setData({
-      ...data,
+      ...safeData,
       settings: {
-        ...data.settings,
+        ...safeData.settings,
         [key]: value,
       },
     });
   };
 
- const saveChanges = async () => {
-  const token = localStorage.getItem("token");
+  const updateSections = (sections) => {
+    setData({
+      ...safeData,
+      sections,
+    });
+  };
 
-  await fetch(`${import.meta.env.VITE_API_URL}/api/page`, {
+  const saveChanges = async () => {
+    const token = localStorage.getItem("token");
 
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify(data)
-  });
+    await fetch(`${import.meta.env.VITE_API_URL}/api/page`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(safeData),
+    });
 
-  alert("Saved");
-};
-
-
+    alert("Saved Successfully ✅");
+  };
 
   return (
     <div className="admin-page">
@@ -44,13 +61,13 @@ function AdminView({ data, setData, closeAdmin }) {
 
           <label>Name</label>
           <input
-            value={data.settings.name}
+            value={safeData.settings.name}
             onChange={(e) => updateSetting("name", e.target.value)}
           />
 
           <label>Tagline</label>
           <input
-            value={data.settings.tagline}
+            value={safeData.settings.tagline}
             onChange={(e) => updateSetting("tagline", e.target.value)}
           />
 
@@ -75,7 +92,7 @@ function AdminView({ data, setData, closeAdmin }) {
 
           <label>Background Type</label>
           <select
-            value={data.settings.backgroundType}
+            value={safeData.settings.backgroundType}
             onChange={(e) =>
               updateSetting("backgroundType", e.target.value)
             }
@@ -85,12 +102,12 @@ function AdminView({ data, setData, closeAdmin }) {
             <option value="image">Image</option>
           </select>
 
-          {data.settings.backgroundType === "color" && (
+          {safeData.settings.backgroundType === "color" && (
             <>
               <label>Pick Color</label>
               <input
                 type="color"
-                value={data.settings.backgroundValue}
+                value={safeData.settings.backgroundValue}
                 onChange={(e) =>
                   updateSetting("backgroundValue", e.target.value)
                 }
@@ -98,11 +115,11 @@ function AdminView({ data, setData, closeAdmin }) {
             </>
           )}
 
-          {data.settings.backgroundType === "gradient" && (
+          {safeData.settings.backgroundType === "gradient" && (
             <>
               <label>Choose Gradient</label>
               <select
-                value={data.settings.backgroundValue}
+                value={safeData.settings.backgroundValue}
                 onChange={(e) =>
                   updateSetting("backgroundValue", e.target.value)
                 }
@@ -120,7 +137,7 @@ function AdminView({ data, setData, closeAdmin }) {
             </>
           )}
 
-          {data.settings.backgroundType === "image" && (
+          {safeData.settings.backgroundType === "image" && (
             <>
               <label>Upload Background Image</label>
               <input
@@ -143,102 +160,92 @@ function AdminView({ data, setData, closeAdmin }) {
         <div className="card">
           <h3 className="card-heading">Sections</h3>
 
-          {data.sections.map((section, sIndex) => (
+          {safeData.sections.map((section, sIndex) => (
             <div key={section.id} className="section-card">
-              {/* SECTION TITLE + DELETE */}
               <div className="link-row">
                 <input
                   value={section.title}
                   onChange={(e) => {
-                    const updated = [...data.sections];
+                    const updated = [...safeData.sections];
                     updated[sIndex].title = e.target.value;
-                    setData({ ...data, sections: updated });
+                    updateSections(updated);
                   }}
                 />
                 <div />
                 <button
                   className="icon-delete"
-                  title="Delete section"
                   onClick={() => {
-                    if (!window.confirm("Delete this section?")) return;
-                    const updated = data.sections.filter(
+                    const updated = safeData.sections.filter(
                       (_, i) => i !== sIndex
                     );
-                    setData({ ...data, sections: updated });
+                    updateSections(updated);
                   }}
                 >
                   🗑️
                 </button>
               </div>
 
-              {/* CATEGORIES */}
-              {section.categories.map((cat, cIndex) => (
+              {section.categories?.map((cat, cIndex) => (
                 <div key={cIndex} className="category-card">
-                  {/* CATEGORY TITLE + DELETE */}
                   <div className="link-row">
                     <input
                       value={cat.title}
                       onChange={(e) => {
-                        const updated = [...data.sections];
+                        const updated = [...safeData.sections];
                         updated[sIndex].categories[cIndex].title =
                           e.target.value;
-                        setData({ ...data, sections: updated });
+                        updateSections(updated);
                       }}
                     />
                     <div />
                     <button
                       className="icon-delete"
-                      title="Delete category"
                       onClick={() => {
-                        if (!window.confirm("Delete this category?")) return;
-                        const updated = [...data.sections];
+                        const updated = [...safeData.sections];
                         updated[sIndex].categories =
                           updated[sIndex].categories.filter(
                             (_, i) => i !== cIndex
                           );
-                        setData({ ...data, sections: updated });
+                        updateSections(updated);
                       }}
                     >
                       🗑️
                     </button>
                   </div>
 
-                  {/* LINKS */}
-                  {cat.links.map((link, lIndex) => (
+                  {cat.links?.map((link, lIndex) => (
                     <div key={lIndex} className="link-row">
                       <input
                         value={link.label}
                         onChange={(e) => {
-                          const updated = [...data.sections];
+                          const updated = [...safeData.sections];
                           updated[sIndex]
                             .categories[cIndex]
                             .links[lIndex].label = e.target.value;
-                          setData({ ...data, sections: updated });
+                          updateSections(updated);
                         }}
                       />
 
                       <input
                         value={link.url}
                         onChange={(e) => {
-                          const updated = [...data.sections];
+                          const updated = [...safeData.sections];
                           updated[sIndex]
                             .categories[cIndex]
                             .links[lIndex].url = e.target.value;
-                          setData({ ...data, sections: updated });
+                          updateSections(updated);
                         }}
                       />
 
                       <button
                         className="icon-delete"
-                        title="Delete link"
                         onClick={() => {
-                          if (!window.confirm("Delete this link?")) return;
-                          const updated = [...data.sections];
+                          const updated = [...safeData.sections];
                           updated[sIndex].categories[cIndex].links =
                             updated[sIndex].categories[
                               cIndex
                             ].links.filter((_, i) => i !== lIndex);
-                          setData({ ...data, sections: updated });
+                          updateSections(updated);
                         }}
                       >
                         🗑️
@@ -246,16 +253,15 @@ function AdminView({ data, setData, closeAdmin }) {
                     </div>
                   ))}
 
-                  {/* ADD LINK */}
                   <button
                     className="btn-small"
                     onClick={() => {
-                      const updated = [...data.sections];
+                      const updated = [...safeData.sections];
                       updated[sIndex].categories[cIndex].links.push({
                         label: "New Link",
                         url: "#",
                       });
-                      setData({ ...data, sections: updated });
+                      updateSections(updated);
                     }}
                   >
                     + Add Link
@@ -263,16 +269,15 @@ function AdminView({ data, setData, closeAdmin }) {
                 </div>
               ))}
 
-              {/* ADD CATEGORY */}
               <button
                 className="btn-small"
                 onClick={() => {
-                  const updated = [...data.sections];
+                  const updated = [...safeData.sections];
                   updated[sIndex].categories.push({
                     title: "New Category",
                     links: [],
                   });
-                  setData({ ...data, sections: updated });
+                  updateSections(updated);
                 }}
               >
                 + Add Category
@@ -280,28 +285,23 @@ function AdminView({ data, setData, closeAdmin }) {
             </div>
           ))}
 
-          {/* ADD SECTION */}
           <button
             className="btn-section"
             onClick={() =>
-              setData({
-                ...data,
-                sections: [
-                  ...data.sections,
-                  {
-                    id: Date.now(),
-                    title: "NEW SECTION",
-                    categories: [],
-                  },
-                ],
-              })
+              updateSections([
+                ...safeData.sections,
+                {
+                  id: Date.now(),
+                  title: "NEW SECTION",
+                  categories: [],
+                },
+              ])
             }
           >
             + Add Section
           </button>
         </div>
 
-        {/* SAVE */}
         <button className="btn-save" onClick={saveChanges}>
           💾 Save Changes
         </button>
