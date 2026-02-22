@@ -7,22 +7,30 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  const handleLogin = async (e) => {
+    e.preventDefault();   // 🔥 prevents page refresh
 
-    const data = await res.json();
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      navigate("/admin"); // stay in admin
-    } else {
-      alert("Invalid credentials");
+      const data = await res.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        navigate("/admin");
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Something went wrong");
     }
   };
 
@@ -31,21 +39,25 @@ function Login() {
       <div className="login-card">
         <h2>Admin Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <button onClick={handleLogin}>Login</button>
+          <button type="submit">Login</button>
+        </form>
       </div>
     </div>
   );
